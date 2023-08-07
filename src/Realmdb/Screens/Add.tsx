@@ -28,7 +28,7 @@ const Add = ({route}: any) => {
     }
   }, []);
   const addData = () => {
-    if (title.length > 0 && description.length > 0) {
+    if (title?.length > 0 && description?.length > 0) {
       Realm.open({
         schema: [RealmData],
         schemaVersion: 2,
@@ -37,7 +37,7 @@ const Add = ({route}: any) => {
         const tempData = response.objects('Data');
         let flag = false;
         tempData.forEach(item => {
-          if (item.title === title) {
+          if (item?.title === title) {
             flag = true;
           }
         });
@@ -62,7 +62,7 @@ const Add = ({route}: any) => {
             response.write(() => {
               let tempData = response.objects('Data');
               let elementDelete = tempData.findIndex(
-                element => element.title === item.title,
+                element => element?.title === title,
               );
               if (elementDelete >= 0) {
                 tempData[elementDelete].description = description;
@@ -78,6 +78,12 @@ const Add = ({route}: any) => {
       Alert.alert('Please enter the data');
     }
   };
+  function desFn(text) {
+    setDescription(text);
+  }
+  function titleFn(text) {
+    setTitle(text);
+  }
   return (
     <View style={Addstyle.mainContainer}>
       <SafeAreaView />
@@ -95,13 +101,13 @@ const Add = ({route}: any) => {
           style={Addstyle.textInput}
           placeholder="Title"
           value={title}
-          onChangeText={text => setTitle(text)}
+          onChangeText={text => titleFn(text)}
         />
         <TextInput
           style={Addstyle.textInput}
           placeholder="Description"
           value={description}
-          onChangeText={text => setDescription(text)}
+          onChangeText={text => desFn(text)}
         />
         <Pressable style={Addstyle.pressable} onPress={addData}>
           <Text style={Addstyle.AddText}>Add</Text>

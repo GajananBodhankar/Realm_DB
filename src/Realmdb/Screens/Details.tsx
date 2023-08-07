@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   SafeAreaView,
   Pressable,
   Image,
+  BackHandler,
+  Alert,
 } from 'react-native';
 import {User} from '../../../App';
 import {RealmData, migration} from './realm';
@@ -18,6 +20,24 @@ const Details = ({navigation}: any) => {
   const handlePressEdit = (item: any) => {
     navigation.navigate('Add', {item});
   };
+  useEffect(() => {
+    const backAction = () => {
+      Alert.alert('Logout', 'Are you sure you want to logout?', [
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        {text: 'YES', onPress: () => navigate('Login')},
+      ]);
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+    return () => backHandler.remove();
+  }, []);
   const handlePressDelete = (item: any, index: number) => {
     Realm.open({
       schema: [RealmData],
@@ -65,6 +85,7 @@ const Details = ({navigation}: any) => {
     }
     return null;
   };
+
   return (
     <View style={Detailstyle.mainContainer}>
       <SafeAreaView />
@@ -76,6 +97,11 @@ const Details = ({navigation}: any) => {
       <View style={Detailstyle.MainFlat}>
         <FlatList data={mainData} renderItem={disp} />
       </View>
+      <Pressable
+        style={Detailstyle.PressableLogout}
+        onPress={() => navigate('Login')}>
+        <Text style={Detailstyle.addtext}>Logout</Text>
+      </Pressable>
     </View>
   );
 };

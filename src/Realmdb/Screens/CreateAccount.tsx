@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {useContext, useState} from 'react';
+import React, {useContext, useRef, useState} from 'react';
 import {
   Dimensions,
   Pressable,
@@ -25,6 +25,10 @@ const CreateAccount = () => {
   const [password, setPassword] = useState('');
   const [cnf, setCnf] = useState('');
   const {mainData, setMainData} = useContext(User);
+  const nameRef = useRef<TextInput>(null);
+  const cnfRef = useRef<TextInput>(null);
+  const pwdRef = useRef<TextInput>(null);
+  const mailRef = useRef<TextInput>(null);
 
   async function create(name: string, email: string, password: string) {
     // const realm = await CreateRealm(name, email, password);
@@ -53,11 +57,40 @@ const CreateAccount = () => {
   const handlePress = () => {
     const regexPattern = /^[A-Za-z\s]+$/;
     const x = /^[\w.-]+@gmail.com$/;
+    let mainFlag = false;
+    if (nameRef.current?.isFocused()) {
+      if (!regexPattern.test(name)) {
+        Alert.alert('Invalid format for name, only alphabets accepted');
+        mainFlag = true;
+      }
+    }
+    if (mailRef.current?.isFocused()) {
+      if (!x.test(email)) {
+        Alert.alert('Invalid format for email, ensure to end with @gmail.com');
+        mainFlag = true;
+      }
+    }
+    if (pwdRef.current?.isFocused()) {
+      if (password.length !== 5 || !Number(password)) {
+        Alert.alert('Please enter password in numberic form having 5 digits');
+        mainFlag = true;
+      }
+    }
+    if (cnfRef.current?.isFocused()) {
+      if (cnf.length !== 5 || !Number(cnf)) {
+        Alert.alert('Please enter password in numberic form having 5 digits');
+        mainFlag = true;
+      } else if (cnf !== password) {
+        Alert.alert('Password mismatched!!');
+        mainFlag = true;
+      }
+    }
     if (
       regexPattern.test(name) &&
       x.test(email) &&
       password.length === 5 &&
-      Number(password)
+      Number(password) &&
+      mainFlag === false
     ) {
       if (cnf === password) {
         Realm.open({
@@ -88,10 +121,25 @@ const CreateAccount = () => {
       } else {
         Alert.alert('Password and confirm password did not match');
       }
-    } else {
-      Alert.alert(
-        'Please ensure, password must be a five digit number,email should end with @gmail.com and name must only have alphabets',
-      );
+    } else if (mainFlag === false) {
+      if (
+        name.length == 0 &&
+        password.length == 0 &&
+        cnf.length == 0 &&
+        email.length == 0
+      ) {
+        Alert.alert('Please fill all the details');
+      } else if (!regexPattern.test(name)) {
+        Alert.alert('Invalid format for name, only alphabets accepted');
+      } else if (!x.test(email)) {
+        Alert.alert('Invalid format for email, ensure to end with @gmail.com');
+      } else if (password.length !== 5 || !Number(password)) {
+        Alert.alert('Please enter password in numberic form having 5 digits');
+      } else if (cnf.length !== 5 || !Number(cnf)) {
+        Alert.alert('Please enter password in numberic form having 5 digits');
+      } else {
+        Alert.alert('Error!!Ensure you have filled the details correctly');
+      }
     }
   };
 
@@ -109,6 +157,7 @@ const CreateAccount = () => {
       </Pressable>
       <View style={Accountstyle.subContainer}>
         <TextInput
+          ref={nameRef}
           placeholder="Name"
           style={Accountstyle.placeholder1}
           placeholderTextColor={'grey'}
@@ -116,6 +165,7 @@ const CreateAccount = () => {
           onChangeText={text => setName(text)}
         />
         <TextInput
+          ref={mailRef}
           placeholder="Email"
           style={Accountstyle.placeholder1}
           placeholderTextColor={'grey'}
@@ -123,6 +173,7 @@ const CreateAccount = () => {
           onChangeText={text => setEmail(text)}
         />
         <TextInput
+          ref={pwdRef}
           placeholder="Password"
           style={Accountstyle.placeholder2}
           placeholderTextColor={'grey'}
@@ -131,6 +182,7 @@ const CreateAccount = () => {
           onChangeText={text => setPassword(text)}
         />
         <TextInput
+          ref={cnfRef}
           placeholder="Confirm Password"
           style={Accountstyle.placeholder2}
           placeholderTextColor={'grey'}

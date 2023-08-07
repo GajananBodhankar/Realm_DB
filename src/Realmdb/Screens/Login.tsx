@@ -1,4 +1,5 @@
-import React, {useContext, useEffect, useState} from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {Pressable, TextInput, View, Text, Alert, StatusBar} from 'react-native';
 import {RealmData, migration} from './realm';
 import {User} from '../../../App';
@@ -8,6 +9,8 @@ import {navigate} from './Navigate';
 const Login = ({navigation}: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const mailRef = useRef<TextInput>(null);
+  const pwdRef = useRef<TextInput>(null);
   async function Read() {
     Realm.open({
       schema: [RealmData],
@@ -29,27 +32,52 @@ const Login = ({navigation}: any) => {
   }
   const login = () => {
     const x = /^[\w.-]+@gmail.com$/;
-
-    if (Number(password) && password.length === 5 && x.test(email)) {
-      let flag = false;
-      mainData.map(item => {
-        if (item?.email === email && item?.password === password) {
-          flag = true;
-        }
-      });
-      if (flag) {
-        console.log('True');
-        navigation.navigate('Details');
-      } else {
-        console.log('False');
-        Alert.alert('Invalid credentials');
-        setEmail('');
-        setPassword('');
+    let mainFlag = false;
+    if (mailRef.current?.isFocused()) {
+      if (!x.test(email)) {
+        Alert.alert('Invalid email format, please include @gmail.com in it');
+        mainFlag = true;
       }
-    } else {
-      Alert.alert(
-        'Please ensure, password must be a five digit number and email should end with @gmail.com',
-      );
+    }
+    if (pwdRef.current?.isFocused()) {
+      if (!Number(password) || password.length !== 5) {
+        Alert.alert('Ensure the length of password must be 5 with all digits');
+        mainFlag = true;
+      }
+    }
+    if (Number(password) && password.length === 5 && x.test(email)) {
+      if (mainFlag == false) {
+        let flag = false;
+        mainData.map(item => {
+          if (item?.email === email && item?.password === password) {
+            flag = true;
+          }
+        });
+        if (flag) {
+          console.log('True');
+          navigation.navigate('Details');
+          mainFlag = false;
+          setEmail('');
+          setPassword('');
+        } else {
+          console.log('False');
+          Alert.alert('Invalid credentials');
+          setEmail('');
+          setPassword('');
+        }
+      }
+    } else if (mainFlag === false) {
+      if (email.length == 0 && password.length == 0) {
+        Alert.alert('Please fill all the details');
+      } else if (!x.test(email)) {
+        Alert.alert('Invalid email format, please include @gmail.com in it');
+      } else if (!Number(password) || password.length !== 5) {
+        Alert.alert('Ensure the length of password must be 5 with all digits');
+      } else {
+        Alert.alert(
+          'Please ensure, password must be a five digit number and email should end with @gmail.com',
+        );
+      }
     }
   };
   const {mainData, setMainData} = useContext(User);
@@ -61,6 +89,7 @@ const Login = ({navigation}: any) => {
     <View style={Loginstyle.mainConatiner}>
       <StatusBar barStyle="light-content" />
       <TextInput
+        ref={mailRef}
         placeholder="Email"
         style={Loginstyle.placeholder1}
         placeholderTextColor={'grey'}
@@ -68,6 +97,7 @@ const Login = ({navigation}: any) => {
         onChangeText={text => setEmail(text)}
       />
       <TextInput
+        ref={pwdRef}
         placeholder="Password"
         style={Loginstyle.placeholder2}
         placeholderTextColor={'grey'}

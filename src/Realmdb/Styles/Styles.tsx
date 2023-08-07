@@ -109,6 +109,12 @@ export const Detailstyle = StyleSheet.create({
   pressableIcon: {
     marginBottom: 10,
   },
+  PressableLogout: {
+    width: 'auto',
+    backgroundColor: '#1e90ff',
+    borderRadius: 4,
+    marginVertical: 20,
+  },
 });
 
 export const Loginstyle = StyleSheet.create({
